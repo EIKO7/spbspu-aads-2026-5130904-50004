@@ -67,20 +67,20 @@ public:
 
   Node* head;
   Node* tail;
-  std::size_t count;  
+  std::size_t count;
 
   BiList()
   {
     head = nullptr;
     tail = nullptr;
-    count = 0;  
+    count = 0;
   }
 
   BiList(const BiList& other)
   {
     head = nullptr;
     tail = nullptr;
-    count = 0;  
+    count = 0;
 
     Node* cur = other.head;
 
@@ -134,7 +134,7 @@ public:
       node->prev = tail;
       tail = node;
     }
-    ++count;  
+    ++count;
   }
 
   void push_front(const T& value)
@@ -152,7 +152,7 @@ public:
       head->prev = node;
       head = node;
     }
-    ++count;  
+    ++count;
   }
 
   void pop_front()
@@ -170,7 +170,7 @@ public:
       tail = nullptr;
 
     delete tmp;
-    --count;  
+    --count;
   }
 
   T& back()

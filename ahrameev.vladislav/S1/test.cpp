@@ -17,7 +17,7 @@ void test_push_back()
   list.push_back(1);
   assert(list.front() == 1);
   assert(list.back() == 1);
-  
+
   list.push_back(2);
   assert(list.back() == 2);
 }
@@ -37,13 +37,13 @@ void test_pop_front()
   list.push_back(1);
   list.push_back(2);
   list.push_back(3);
-  
+
   list.pop_front();
   assert(list.front() == 2);
-  
+
   list.pop_front();
   assert(list.front() == 3);
-  
+
   list.pop_front();
   assert(list.empty());
 }
@@ -54,7 +54,7 @@ void test_iterator()
   list.push_back(1);
   list.push_back(2);
   list.push_back(3);
-  
+
   int expected = 1;
   for (auto it = list.begin(); it != list.end(); ++it)
   {
@@ -67,14 +67,14 @@ void test_copy()
   BiList<int> list1;
   list1.push_back(1);
   list1.push_back(2);
-  
+
   BiList<int> list2 = list1;
   assert(list2.front() == 1);
   assert(list2.back() == 2);
-  
- 
+
+
   list1.push_back(3);
-  assert(list1.size() != list2.size()); 
+  assert(list1.size() != list2.size());
 }
 
 void test_clear()
@@ -96,7 +96,7 @@ int main()
   test_iterator();
   test_copy();
   test_clear();
-  
+
   std::cout << "All tests passed!" << std::endl;
 }
 #endif
