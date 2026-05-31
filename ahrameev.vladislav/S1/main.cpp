@@ -99,7 +99,7 @@ int main()
         sum += value;
 
         numbers.pop_front();
-      } 
+      }
     }
 
     if (more)
