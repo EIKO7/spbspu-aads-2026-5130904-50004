@@ -60,6 +60,7 @@ labs:
 all-dockers: $(addprefix docker-test-,$(labs))
 
 $(addprefix run-,$(labs)): run-%: out/%/lab
+	-@$(FAULT_INJECTION_CONFIG) $(if $(TIMEOUT),$(TIMEOUT_CMD) --signal=KILL $(TIMEOUT)s )$(if $(VALGRIND),valgrind $(VALGRIND) )$< $(ARGS); exit $$?
 	@$(FAULT_INJECTION_CONFIG) $(if $(TIMEOUT),$(TIMEOUT_CMD) --signal=KILL $(TIMEOUT)s )$(if $(VALGRIND),valgrind $(VALGRIND) )$< $(ARGS)
 
 clean:
