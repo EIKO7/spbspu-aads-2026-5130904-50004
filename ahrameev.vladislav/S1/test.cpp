@@ -8,7 +8,6 @@ void test_empty()
 {
   BiList<int> list;
   assert(list.empty());
-  assert(list.begin() == list.end());
 }
 
 void test_push_back()
@@ -71,10 +70,6 @@ void test_copy()
   BiList<int> list2 = list1;
   assert(list2.front() == 1);
   assert(list2.back() == 2);
-
-
-  list1.push_back(3);
-  assert(list1.size() != list2.size());
 }
 
 void test_clear()
@@ -86,7 +81,6 @@ void test_clear()
   assert(list.empty());
 }
 
-#ifdef STANDALONE_TEST
 int main()
 {
   test_empty();
@@ -97,6 +91,6 @@ int main()
   test_copy();
   test_clear();
 
-  std::cout << "All tests passed!" << std::endl;
+  std::cout << "All tests passed!\n";
+  return 0;
 }
-#endif

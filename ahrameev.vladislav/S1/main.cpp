@@ -29,7 +29,7 @@ int main()
       if (!(std::cin >> value))
       {
         std::cerr << "Error: integer overflow during sum calculation\n";
-        return 0;
+        return 1;
       }
 
       if (value > std::numeric_limits<int>::max() ||
@@ -48,6 +48,7 @@ int main()
   if (sequences.empty())
   {
     std::cout << "0\n";
+    return 0;
   }
 
   bool firstName = true;
@@ -95,6 +96,12 @@ int main()
         std::cout << value;
         firstNum = false;
 
+        if (sum > std::numeric_limits<int>::max() - value)
+        {
+          std::cerr << "Error: integer overflow during sum calculation\n";
+          return 1;
+        }
+
         sum += value;
 
         numbers.pop_front();
@@ -112,6 +119,7 @@ int main()
   if (!printed)
   {
     std::cout << "0\n";
+    return 0;
   }
 
   bool firstSum = true;
