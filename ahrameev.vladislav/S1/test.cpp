@@ -33,6 +33,6 @@ int main()
   list1.clear();
   assert(list1.empty());
 
-  std::cout << "All tests passed" << std::endl;
+  std::cout << "All tests passed" << "\n";
   return 0;
 }
