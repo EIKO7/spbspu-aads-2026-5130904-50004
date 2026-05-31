@@ -1,5 +1,6 @@
 #include "BiList.h"
 #include <cassert>
+#include <iostream>
 
 using namespace ahrameev;
 
@@ -78,4 +79,18 @@ void test_clear()
   list.push_back(2);
   list.clear();
   assert(list.empty());
+}
+
+int main()
+{
+  test_empty();
+  test_push_back();
+  test_push_front();
+  test_pop_front();
+  test_iterator();
+  test_copy();
+  test_clear();
+
+  std::cout << "All tests passed!\n";
+  return 0;
 }
