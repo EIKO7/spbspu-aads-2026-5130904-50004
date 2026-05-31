@@ -80,3 +80,17 @@ void test_clear()
   list.clear();
   assert(list.empty());
 }
+
+int main()
+{
+  test_empty();
+  test_push_back();
+  test_push_front();
+  test_pop_front();
+  test_iterator();
+  test_copy();
+  test_clear();
+
+  std::cout << "All tests passed!\n";
+  return 0;
+}

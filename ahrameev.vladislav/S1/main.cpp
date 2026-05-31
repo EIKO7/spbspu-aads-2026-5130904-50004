@@ -28,14 +28,14 @@ int main()
 
       if (!(std::cin >> value))
       {
-        std::cerr << "Error: integer overflow during sum calculation\n";
+        std::cerr << "Formed lists with exit code 1 and error message in standard error because of overflow\n";
         return 1;
       }
 
       if (value > std::numeric_limits<int>::max() ||
           value < std::numeric_limits<int>::min())
       {
-        std::cerr << "Error: integer overflow during sum calculation\n";
+        std::cerr << "Formed lists with exit code 1 and error message in standard error because of overflow\n";
         return 1;
       }
 
@@ -98,7 +98,7 @@ int main()
 
         if (sum > std::numeric_limits<int>::max() - value)
         {
-          std::cerr << "Error: integer overflow during sum calculation\n";
+          std::cerr << "Formed lists with exit code 1 and error message in standard error because of overflow\n";
           return 1;
         }
 
