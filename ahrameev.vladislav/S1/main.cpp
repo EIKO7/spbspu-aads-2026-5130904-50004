@@ -36,7 +36,7 @@ int main()
           value < std::numeric_limits<int>::min())
       {
         std::cerr << "Formed lists with exit code 1 and error message in standard error because of overflow\n";
-        return 0;
+        return 1;  
       }
 
       p.second.push_back(static_cast<int>(value));
@@ -131,5 +131,4 @@ int main()
 
   std::cout << "\n";
 
-  return 0;
 }
