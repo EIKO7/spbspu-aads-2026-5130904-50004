@@ -29,14 +29,14 @@ int main()
       if (!(std::cin >> value))
       {
         std::cerr << "Formed lists with exit code 1 and error message in standard error because of overflow\n";
-        return 0;
+        return 1;
       }
 
       if (value > std::numeric_limits<int>::max() ||
           value < std::numeric_limits<int>::min())
       {
         std::cerr << "Formed lists with exit code 1 and error message in standard error because of overflow\n";
-        return 0;
+        return 1;
       }
 
       p.second.push_back(static_cast<int>(value));
@@ -99,7 +99,7 @@ int main()
         if (sum > std::numeric_limits<int>::max() - value)
         {
           std::cerr << "Formed lists with exit code 1 and error message in standard error because of overflow\n";
-          return 0;
+          return 1;
         }
 
         sum += value;
