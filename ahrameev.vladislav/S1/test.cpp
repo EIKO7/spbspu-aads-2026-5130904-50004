@@ -2,7 +2,7 @@
 #include <cassert>
 #include <iostream>
 
-using namespace akhrameev;
+using namespace ahrameev;
 
 int main()
 {

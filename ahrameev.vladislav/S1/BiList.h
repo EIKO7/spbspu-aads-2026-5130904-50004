@@ -1,7 +1,7 @@
 #ifndef BILIST_H
 #define BILIST_H
 
-namespace akhrameev
+namespace ahrameev
 {
 
 template<class T>

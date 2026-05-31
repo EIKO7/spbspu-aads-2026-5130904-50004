@@ -4,7 +4,7 @@
 #include <string>
 #include <limits>
 
-using namespace akhrameev;
+using namespace ahrameev;
 
 struct Pair
 {
