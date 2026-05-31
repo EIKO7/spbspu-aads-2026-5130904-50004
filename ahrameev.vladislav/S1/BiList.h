@@ -121,6 +121,23 @@ public:
     }
   }
 
+  void push_front(const T& value)
+  {
+    Node* node = new Node(value);
+
+    if (empty())
+    {
+      head = node;
+      tail = node;
+    }
+    else
+    {
+      node->next = head;
+      head->prev = node;
+      head = node;
+    }
+  }
+
   void pop_front()
   {
     if (empty())
