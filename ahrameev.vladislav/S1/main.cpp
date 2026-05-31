@@ -48,7 +48,6 @@ int main()
   if (sequences.empty())
   {
     std::cout << "0\n";
-    return 0;
   }
 
   bool firstName = true;
@@ -113,7 +112,6 @@ int main()
   if (!printed)
   {
     std::cout << "0\n";
-    return 0;
   }
 
   bool firstSum = true;

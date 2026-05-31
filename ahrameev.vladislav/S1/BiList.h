@@ -1,6 +1,8 @@
 #ifndef BILIST_H
 #define BILIST_H
 
+#include <cstddef>
+
 namespace ahrameev
 {
 
@@ -28,6 +30,11 @@ public:
   {
     node = node->next;
     return *this;
+  }
+
+  bool operator==(const LIter& other) const
+  {
+    return node == other.node;
   }
 
   bool operator!=(const LIter& other) const
@@ -60,17 +67,20 @@ public:
 
   Node* head;
   Node* tail;
+  std::size_t count;  
 
   BiList()
   {
     head = nullptr;
     tail = nullptr;
+    count = 0;  
   }
 
   BiList(const BiList& other)
   {
     head = nullptr;
     tail = nullptr;
+    count = 0;  
 
     Node* cur = other.head;
 
@@ -104,6 +114,11 @@ public:
     return head == nullptr;
   }
 
+  std::size_t size() const
+  {
+    return count;
+  }
+
   void push_back(const T& value)
   {
     Node* node = new Node(value);
@@ -119,6 +134,7 @@ public:
       node->prev = tail;
       tail = node;
     }
+    ++count;  
   }
 
   void push_front(const T& value)
@@ -136,6 +152,7 @@ public:
       head->prev = node;
       head = node;
     }
+    ++count;  
   }
 
   void pop_front()
@@ -153,9 +170,25 @@ public:
       tail = nullptr;
 
     delete tmp;
+    --count;  
+  }
+
+  T& back()
+  {
+    return tail->val;
+  }
+
+  const T& back() const
+  {
+    return tail->val;
   }
 
   T& front()
+  {
+    return head->val;
+  }
+
+  const T& front() const
   {
     return head->val;
   }
