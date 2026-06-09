@@ -161,7 +161,7 @@ public:
     if (head != nullptr)
       head->prev = nullptr;
     else
-      tail = nullptr;  
+      tail = nullptr;
 
     delete tmp;
     --count;
