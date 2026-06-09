@@ -15,7 +15,6 @@ class LIter
   typename BiList<T>::Node* node;
 
 public:
-
   LIter(typename BiList<T>::Node* n = nullptr)
   {
     node = n;
@@ -48,9 +47,7 @@ public:
 template<class T>
 class BiList
 {
-
 public:
-
   struct Node
   {
     T val;
@@ -83,7 +80,6 @@ public:
     count = 0;
 
     Node* cur = other.head;
-
     while (cur != nullptr)
     {
       push_back(cur->val);
@@ -99,7 +95,6 @@ public:
     clear();
 
     Node* cur = other.head;
-
     while (cur != nullptr)
     {
       push_back(cur->val);
@@ -161,13 +156,12 @@ public:
       return;
 
     Node* tmp = head;
-
     head = head->next;
 
     if (head != nullptr)
       head->prev = nullptr;
     else
-      tail = nullptr;
+      tail = nullptr;  
 
     delete tmp;
     --count;
@@ -213,7 +207,6 @@ public:
   {
     return LIter<T>(nullptr);
   }
-
 };
 
 }
