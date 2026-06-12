@@ -30,24 +30,18 @@ int main()
         continue;
       }
 
-      long long value = 0;
+      unsigned long long value = 0;
 
       if (!(std::cin >> value))
       {
-        std::cout.flush();
         std::cerr << "Formed lists with exit code 1 and error message in standard error because of overflow\n";
-        std::cerr.flush();
-
-        std::quick_exit(1);
+        return 1;
       }
 
-      if (value > std::numeric_limits<int>::max() ||
-          value < std::numeric_limits<int>::min())
+      if (value > static_cast<unsigned long long>(std::numeric_limits<int>::max()))
       {
-        std::cout.flush();
         std::cerr << "Formed lists with exit code 1 and error message in standard error because of overflow\n";
-        std::cerr.flush();
-        std::quick_exit(1);
+        return 1;
       }
 
       p.second.push_back(static_cast<int>(value));
@@ -112,10 +106,8 @@ int main()
         if (current_level_sum > std::numeric_limits<int>::max() ||
             current_level_sum < std::numeric_limits<int>::min())
         {
-          std::cout.flush();
           std::cerr << "Formed lists with exit code 1 and error message in standard error because of overflow\n";
-          std::cerr.flush();
-          std::quick_exit(1);
+          return 1;
         }
 
         ++((*it).current);
