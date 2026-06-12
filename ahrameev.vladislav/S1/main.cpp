@@ -31,24 +31,23 @@ int main()
       }
 
       long long value = 0;
-
+      
       if (!(std::cin >> value))
       {
+        std::cout.flush();
         std::cerr << "Formed lists with exit code 1 and error message in standard error because of overflow\n";
-
-        std::cin.clear();
-        while (std::cin.peek() != EOF && std::cin.peek() != '\n' && std::cin.peek() != '\r')
-        {
-          std::cin.get();
-        }
-        return 1;
+        std::cerr.flush();
+        
+        std::quick_exit(1);
       }
 
       if (value > std::numeric_limits<int>::max() ||
           value < std::numeric_limits<int>::min())
       {
+        std::cout.flush();
         std::cerr << "Formed lists with exit code 1 and error message in standard error because of overflow\n";
-        return 1;
+        std::cerr.flush();
+        std::quick_exit(1);
       }
 
       p.second.push_back(static_cast<int>(value));
@@ -95,7 +94,7 @@ int main()
   while (more)
   {
     more = false;
-    long long current_level_sum = 0;
+    long long current_level_sum = 0; 
     bool firstNum = true;
 
     for (auto it = states.begin(); it != states.end(); ++it)
@@ -110,11 +109,13 @@ int main()
         firstNum = false;
 
         current_level_sum += value;
-        if (current_level_sum > std::numeric_limits<int>::max() ||
+        if (current_level_sum > std::numeric_limits<int>::max() || 
             current_level_sum < std::numeric_limits<int>::min())
         {
+          std::cout.flush();
           std::cerr << "Formed lists with exit code 1 and error message in standard error because of overflow\n";
-          return 1;
+          std::cerr.flush();
+          std::quick_exit(1);
         }
 
         ++((*it).current);
