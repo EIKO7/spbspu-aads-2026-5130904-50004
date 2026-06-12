@@ -2,105 +2,57 @@
 #include <iostream>
 #include <string>
 #include <limits>
-#include <cctype>
 
 using namespace ahrameev;
 
 struct Pair
 {
   std::string first;
-  BiList<long long> second;
+  BiList<int> second;
 };
 
 int main()
 {
   BiList<Pair> sequences;
   std::string name;
-  bool overflow_detected = false;
 
   while (std::cin >> name)
   {
     Pair p;
     p.first = name;
 
-    while (std::cin.peek() != EOF && std::cin.peek() != '\n' && std::cin.peek() != '\r')
+    while (std::cin.peek() == ' ' || std::cin.peek() == '\t')
     {
-      // Пропускаем пробелы перед числом
-      if (std::isspace(std::cin.peek()))
+      std::cin.get();
+
+      if (std::cin.peek() == '\n' || std::cin.peek() == '\r' || std::cin.peek() == EOF)
       {
-        std::cin.get();
-        continue;
+        break;
       }
 
-      std::string num_str;
-      while (std::cin.peek() != EOF && !std::isspace(std::cin.peek()))
+      long long value;
+      if (!(std::cin >> value))
       {
-        num_str += static_cast<char>(std::cin.get());
+        std::cerr << "Overflow\n";
+        return 1;
       }
 
-      if (num_str.empty())
+      if (value > std::numeric_limits<int>::max() ||
+          value < std::numeric_limits<int>::min())
       {
-        continue;
+        std::cerr << "Overflow\n";
+        return 1;
       }
 
-      unsigned long long val = 0;
-      bool local_overflow = false;
-      bool is_negative = (num_str[0] == '-');
-      std::size_t start_idx = (num_str[0] == '-' || num_str[0] == '+') ? 1 : 0;
-
-      for (std::size_t i = start_idx; i < num_str.length(); ++i)
-      {
-        if (!std::isdigit(num_str[i]))
-        {
-          local_overflow = true;
-          break;
-        }
-
-        if (val > std::numeric_limits<unsigned long long>::max() / 10)
-        {
-          local_overflow = true;
-        }
-        val *= 10;
-
-        unsigned int digit = num_str[i] - '0';
-        if (val > std::numeric_limits<unsigned long long>::max() - digit)
-        {
-          local_overflow = true;
-        }
-        val += digit;
-      }
-
-      if (local_overflow)
-      {
-        overflow_detected = true;
-        continue;
-      }
-
-      if (!is_negative && val > static_cast<unsigned long long>(std::numeric_limits<int>::max()))
-      {
-        overflow_detected = true;
-      }
-      else if (is_negative && val > static_cast<unsigned long long>(-(static_cast<long long>(std::numeric_limits<int>::min()))))
-      {
-        overflow_detected = true;
-      }
-
-      long long final_val = is_negative ? -static_cast<long long>(val) : static_cast<long long>(val);
-      p.second.push_back(final_val);
+      p.second.push_back(static_cast<int>(value));
     }
 
-    if (std::cin.peek() == '\n' || std::cin.peek() == '\r')
+    while (std::cin.peek() == '\n' || std::cin.peek() == '\r')
     {
       std::cin.get();
     }
 
     sequences.push_back(p);
-  }
-
-  if (overflow_detected)
-  {
-    std::cerr << "Formed lists with exit code 1 and error message in standard error because of overflow\n";
-    return 1;
   }
 
   if (sequences.empty())
@@ -112,7 +64,10 @@ int main()
   bool firstName = true;
   for (auto it = sequences.begin(); it != sequences.end(); ++it)
   {
-    if (!firstName) std::cout << " ";
+    if (!firstName)
+    {
+      std::cout << " ";
+    }
     std::cout << (*it).first;
     firstName = false;
   }
@@ -120,11 +75,11 @@ int main()
 
   bool more = true;
   bool printed = false;
-  BiList<long long> sums;
+  BiList<int> sums;
 
   struct IterState {
-    LIter<long long> current;
-    LIter<long long> end;
+    LIter<int> current;
+    LIter<int> end;
   };
 
   BiList<IterState> states;
@@ -136,7 +91,7 @@ int main()
   while (more)
   {
     more = false;
-    long long current_level_sum = 0;
+    long long sum = 0;
     bool firstNum = true;
 
     for (auto it = states.begin(); it != states.end(); ++it)
@@ -144,18 +99,20 @@ int main()
       if ((*it).current != (*it).end)
       {
         more = true;
-        long long value = *((*it).current);
+        int value = *((*it).current);
 
-        if (!firstNum) std::cout << " ";
+        if (!firstNum)
+        {
+          std::cout << " ";
+        }
         std::cout << value;
         firstNum = false;
 
-        current_level_sum += value;
-
-        if (current_level_sum > std::numeric_limits<int>::max() ||
-            current_level_sum < std::numeric_limits<int>::min())
+        sum += value;
+        if (sum > std::numeric_limits<int>::max() || sum < std::numeric_limits<int>::min())
         {
-          overflow_detected = true;
+          std::cerr << "Overflow\n";
+          return 1;
         }
 
         ++((*it).current);
@@ -166,14 +123,8 @@ int main()
     {
       printed = true;
       std::cout << "\n";
-      sums.push_back(current_level_sum);
+      sums.push_back(static_cast<int>(sum));
     }
-  }
-
-  if (overflow_detected)
-  {
-    std::cerr << "Formed lists with exit code 1 and error message in standard error because of overflow\n";
-    return 1;
   }
 
   if (!printed)
@@ -182,11 +133,13 @@ int main()
     return 0;
   }
 
-  // 3. Выводим суммы столбцов
   bool firstSum = true;
   for (auto it = sums.begin(); it != sums.end(); ++it)
   {
-    if (!firstSum) std::cout << " ";
+    if (!firstSum)
+    {
+      std::cout << " ";
+    }
     std::cout << *it;
     firstSum = false;
   }
