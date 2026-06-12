@@ -30,32 +30,17 @@ int main()
         continue;
       }
 
-      std::string raw_number;
-      while (std::cin.peek() != EOF && !std::isspace(std::cin.peek()))
-      {
-        raw_number += static_cast<char>(std::cin.get());
-      }
-
-      if (raw_number.empty())
-      {
-        continue;
-      }
-
       long long value = 0;
-      try
-      {
-        std::size_t pos = 0;
-        value = std::stoll(raw_number, &pos);
 
-        if (pos != raw_number.length())
-        {
-          std::cerr << "Formed lists with exit code 1 and error message in standard error because of overflow\n";
-          return 1;
-        }
-      }
-      catch (...)
+      if (!(std::cin >> value))
       {
         std::cerr << "Formed lists with exit code 1 and error message in standard error because of overflow\n";
+
+        std::cin.clear();
+        while (std::cin.peek() != EOF && std::cin.peek() != '\n' && std::cin.peek() != '\r')
+        {
+          std::cin.get();
+        }
         return 1;
       }
 
