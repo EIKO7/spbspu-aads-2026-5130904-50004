@@ -16,6 +16,7 @@ int main()
 {
   BiList<Pair> sequences;
   std::string name;
+  bool has_overflow = false;
 
   while (std::cin >> name)
   {
@@ -30,18 +31,26 @@ int main()
         continue;
       }
 
+      if (has_overflow)
+      {
+        std::cin.get();
+        continue;
+      }
+
       unsigned long long value = 0;
 
       if (!(std::cin >> value))
       {
-        std::cerr << "Formed lists with exit code 1 and error message in standard error because of overflow\n";
-        return 1;
+        has_overflow = true;
+        std::cin.clear();
+        std::cin.get();
+        continue;
       }
 
       if (value > static_cast<unsigned long long>(std::numeric_limits<int>::max()))
       {
-        std::cerr << "Formed lists with exit code 1 and error message in standard error because of overflow\n";
-        return 1;
+        has_overflow = true;
+        continue;
       }
 
       p.second.push_back(static_cast<int>(value));
@@ -52,7 +61,16 @@ int main()
       std::cin.get();
     }
 
-    sequences.push_back(p);
+    if (!has_overflow)
+    {
+      sequences.push_back(p);
+    }
+  }
+
+  if (has_overflow)
+  {
+    std::cerr << "Formed lists with exit code 1 and error message in standard error because of overflow\n";
+    return 1;
   }
 
   if (sequences.empty())
