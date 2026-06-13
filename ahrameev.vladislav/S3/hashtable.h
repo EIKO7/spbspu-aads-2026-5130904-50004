@@ -130,6 +130,38 @@ public:
     HashTable(HashTable&& o) noexcept : table_(o.table_), capacity_(o.capacity_), size_(o.size_), hash_func_(std::move(o.hash_func_)), equal_func_(std::move(o.equal_func_)) {
         o.table_ = nullptr; o.capacity_ = o.size_ = 0;
     }
+
+    void add(const Key& k, const Value& v) {
+        size_t h = hash_func_(k);
+        for (size_t i = 0; i < capacity_; ++i) {
+            size_t idx = probe(h, i);
+            if (table_[idx].state == State::Empty) {
+                table_[idx].state = State::Occupied; table_[idx].key = k; table_[idx].value = v; size_++; return;
+            }
+            if (table_[idx].state == State::Occupied && equal_func_(table_[idx].key, k)) throw std::invalid_argument("Key exists");
+        }
+        throw std::length_error("Hash table is full");
+    }
+
+    Value& get(const Key& k) {
+        size_t h = hash_func_(k);
+        for (size_t i = 0; i < capacity_; ++i) {
+            size_t idx = probe(h, i);
+            if (table_[idx].state == State::Empty) break;
+            if (table_[idx].state == State::Occupied && equal_func_(table_[idx].key, k)) return table_[idx].value;
+        }
+        throw std::out_of_range("Key not found");
+    }
+
+    bool has(const Key& k) const {
+        size_t h = hash_func_(k);
+        for (size_t i = 0; i < capacity_; ++i) {
+            size_t idx = probe(h, i);
+            if (table_[idx].state == State::Empty) return false;
+            if (table_[idx].state == State::Occupied && equal_func_(table_[idx].key, k)) return true;
+        }
+        return false;
+    }
 };
 
 } 
