@@ -90,12 +90,32 @@ void run(const std::string& filename) {
                     std::cout << "\n"; i = j;
                 }
             }
+            else if (cmd == "bind") {
+                if (t.size() != 5 || !graphs_db.has(t[1])) { std::cout << "<INVALID COMMAND>\n"; continue; }
+                Graph& g = graphs_db.get(t[1]);
+                if (!g.vertices.contains(t[2])) g.vertices.push_back(t[2]);
+                if (!g.vertices.contains(t[3])) g.vertices.push_back(t[3]);
+                std::pair<std::string, std::string> edge = {t[2], t[3]};
+                uint32_t w = std::stoul(t[4]);
+                if (g.edges.has(edge)) g.edges.get(edge).push_back(w);
+                else { Vector<uint32_t> wv; wv.push_back(w); g.edges.add(edge, wv); }
+            }
+            else if (cmd == "cut") {
+                if (t.size() != 5 || !graphs_db.has(t[1])) { std::cout << "<INVALID COMMAND>\n"; continue; }
+                Graph& g = graphs_db.get(t[1]);
+                if (!g.vertices.contains(t[2]) || !g.vertices.contains(t[3])) { std::cout << "<INVALID COMMAND>\n"; continue; }
+                std::pair<std::string, std::string> edge = {t[2], t[3]};
+                if (!g.edges.has(edge)) { std::cout << "<INVALID COMMAND>\n"; continue; }
+                Vector<uint32_t>& wv = g.edges.get(edge);
+                if (!wv.erase_value(std::stoul(t[4]))) { std::cout << "<INVALID COMMAND>\n"; continue; }
+                if (wv.empty()) g.edges.drop(edge);
+            }
             else { std::cout << "<INVALID COMMAND>\n"; }
         } catch (...) { std::cout << "<INVALID COMMAND>\n"; }
     }
 }
 
-}
+} 
 
 int main(int argc, char* argv[]) {
     if (argc != 2) { std::cerr << "Usage: " << argv[0] << " <filename>\n"; return 1; }
