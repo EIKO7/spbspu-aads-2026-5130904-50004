@@ -89,5 +89,48 @@ struct PairEq {
     }
 };
 
+template <class Key, class Value, class Hash, class Equal>
+class HashTable {
+    enum class State { Empty, Occupied };
+    struct Slot { State state; Key key; Value value; Slot() : state(State::Empty) {} };
+
+    Slot* table_;
+    size_t capacity_, size_;
+    Hash hash_func_;
+    Equal equal_func_;
+
+    size_t probe(size_t hash, size_t i) const { return (hash + i * i) % capacity_; }
+
+    void reallocate(size_t new_cap) {
+        Slot* old = table_; size_t old_cap = capacity_;
+        table_ = new Slot[new_cap]; capacity_ = new_cap; size_ = 0;
+        for (size_t i = 0; i < old_cap; ++i) {
+            if (old[i].state == State::Occupied) {
+                size_t h = hash_func_(old[i].key);
+                for (size_t j = 0; ; ++j) {
+                    size_t idx = probe(h, j);
+                    if (table_[idx].state == State::Empty) {
+                        table_[idx].state = State::Occupied;
+                        table_[idx].key = std::move(old[i].key);
+                        table_[idx].value = std::move(old[i].value);
+                        size_++; break;
+                    }
+                }
+            }
+        }
+        delete[] old;
+    }
+
+public:
+    explicit HashTable(size_t cap = 16) : capacity_(cap), size_(0) { table_ = new Slot[capacity_]; }
+    ~HashTable() { delete[] table_; }
+
+    HashTable(const HashTable&) = delete;
+    HashTable& operator=(const HashTable&) = delete;
+    HashTable(HashTable&& o) noexcept : table_(o.table_), capacity_(o.capacity_), size_(o.size_), hash_func_(std::move(o.hash_func_)), equal_func_(std::move(o.equal_func_)) {
+        o.table_ = nullptr; o.capacity_ = o.size_ = 0;
+    }
+};
+
 } 
-#endif
+#endif 
