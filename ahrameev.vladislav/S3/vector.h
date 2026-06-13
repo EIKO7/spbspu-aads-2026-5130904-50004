@@ -57,6 +57,31 @@ public:
         }
         return *this;
     }
+
+    void push_back(const T& v) {
+        if (size_ == capacity_) reallocate(capacity_ ? capacity_ * 2 : 4);
+        data_[size_++] = v;
+    }
+
+    void push_back(T&& v) {
+        if (size_ == capacity_) reallocate(capacity_ ? capacity_ * 2 : 4);
+        data_[size_++] = std::move(v);
+    }
+
+    bool contains(const T& v) const {
+        for (size_t i = 0; i < size_; ++i) if (data_[i] == v) return true;
+        return false;
+    }
+
+    T& operator[](size_t i) { return data_[i]; }
+    const T& operator[](size_t i) const { return data_[i]; }
+    size_t size() const { return size_; }
+    bool empty() const { return size_ == 0; }
+
+    T* begin() { return data_; }
+    T* end() { return data_ + size_; }
+    const T* begin() const { return data_; }
+    const T* end() const { return data_ + size_; }
 };
 
 } 
