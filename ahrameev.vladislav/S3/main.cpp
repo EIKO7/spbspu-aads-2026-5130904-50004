@@ -69,12 +69,33 @@ void run(const std::string& filename) {
                 Vector<std::string> v = g.vertices; v.sort();
                 for (size_t i = 0; i < v.size(); ++i) if (i == 0 || v[i] != v[i-1]) std::cout << v[i] << "\n";
             }
+            else if (cmd == "outbound" || cmd == "inbound") {
+                if (t.size() != 3 || !graphs_db.has(t[1])) { std::cout << "<INVALID COMMAND>\n"; continue; }
+                Graph& g = graphs_db.get(t[1]);
+                if (!g.vertices.contains(t[2])) { std::cout << "<INVALID COMMAND>\n"; continue; }
+                struct EdgeInfo { std::string node; uint32_t w; bool operator<(const EdgeInfo& o) const { return node != o.node ? node < o.node : w < o.w; } };
+                Vector<EdgeInfo> edges_list;
+                for (auto it = g.edges.begin(); it != g.edges.end(); ++it) {
+                    bool match = (cmd == "outbound") ? ((*it).key.first == t[2]) : ((*it).key.second == t[2]);
+                    if (match) {
+                        std::string target = (cmd == "outbound") ? (*it).key.second : (*it).key.first;
+                        for (size_t i = 0; i < (*it).value.size(); ++i) edges_list.push_back({target, (*it).value[i]});
+                    }
+                }
+                edges_list.sort();
+                for (size_t i = 0; i < edges_list.size(); ) {
+                    std::cout << edges_list[i].node;
+                    size_t j = i;
+                    while (j < edges_list.size() && edges_list[j].node == edges_list[i].node) { std::cout << " " << edges_list[j].w; ++j; }
+                    std::cout << "\n"; i = j;
+                }
+            }
             else { std::cout << "<INVALID COMMAND>\n"; }
         } catch (...) { std::cout << "<INVALID COMMAND>\n"; }
     }
 }
 
-} 
+}
 
 int main(int argc, char* argv[]) {
     if (argc != 2) { std::cerr << "Usage: " << argv[0] << " <filename>\n"; return 1; }
