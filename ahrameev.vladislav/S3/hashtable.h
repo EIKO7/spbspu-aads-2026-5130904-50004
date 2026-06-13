@@ -1,5 +1,5 @@
-#ifndef AHFRAMEEV_HASHTABLE_H
-#define AHFRAMEEV_HASHTABLE_H
+#ifndef AHRAMEEV_HASHTABLE_H
+#define AHRAMEEV_HASHTABLE_H
 
 #include <string>
 #include <cstdint>
@@ -183,6 +183,21 @@ public:
         }
         throw std::out_of_range("Key not found");
     }
+
+    void rehash(size_t slots) {
+        if (slots <= size_) throw std::invalid_argument("New capacity too small");
+        reallocate(slots);
+    }
+
+    struct Iterator {
+        Slot* ptr, *end;
+        Iterator& operator++() { do { ++ptr; } while (ptr != end && ptr->state != State::Occupied); return *this; }
+        bool operator!=(const Iterator& o) const { return ptr != o.ptr; }
+        Slot& operator*() { return *ptr; }
+        Slot* operator->() { return ptr; }
+    };
+    Iterator begin() { Iterator it{table_, table_ + capacity_}; if (it.ptr != it.end && it.ptr->state != State::Occupied) ++it; return it; }
+    Iterator end() { return Iterator{table_ + capacity_, table_ + capacity_}; }
 };
 
 } 
