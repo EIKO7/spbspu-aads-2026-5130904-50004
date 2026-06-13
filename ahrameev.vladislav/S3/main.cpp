@@ -63,6 +63,12 @@ void run(const std::string& filename) {
                 names.sort();
                 for (size_t i = 0; i < names.size(); ++i) std::cout << names[i] << "\n";
             }
+            else if (cmd == "vertexes") {
+                if (t.size() != 2 || !graphs_db.has(t[1])) { std::cout << "<INVALID COMMAND>\n"; continue; }
+                Graph& g = graphs_db.get(t[1]);
+                Vector<std::string> v = g.vertices; v.sort();
+                for (size_t i = 0; i < v.size(); ++i) if (i == 0 || v[i] != v[i-1]) std::cout << v[i] << "\n";
+            }
             else { std::cout << "<INVALID COMMAND>\n"; }
         } catch (...) { std::cout << "<INVALID COMMAND>\n"; }
     }
@@ -74,5 +80,4 @@ int main(int argc, char* argv[]) {
     if (argc != 2) { std::cerr << "Usage: " << argv[0] << " <filename>\n"; return 1; }
     try { ahrameev::run(argv[1]); } 
     catch (const std::exception& e) { std::cerr << "Error: " << e.what() << "\n"; return 1; }
-    return 0;
 }
