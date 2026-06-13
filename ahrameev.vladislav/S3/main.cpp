@@ -110,12 +110,54 @@ void run(const std::string& filename) {
                 if (!wv.erase_value(std::stoul(t[4]))) { std::cout << "<INVALID COMMAND>\n"; continue; }
                 if (wv.empty()) g.edges.drop(edge);
             }
+            else if (cmd == "create") {
+                if (t.size() < 3 || graphs_db.has(t[1])) { std::cout << "<INVALID COMMAND>\n"; continue; }
+                size_t k = std::stoul(t[2]);
+                if (t.size() != 3 + k) { std::cout << "<INVALID COMMAND>\n"; continue; }
+                Graph ng; ng.name = t[1];
+                for (size_t i = 0; i < k; ++i) ng.vertices.push_back(t[3 + i]);
+                graphs_db.add(t[1], std::move(ng));
+            }
+            else if (cmd == "merge") {
+                if (t.size() != 4 || !graphs_db.has(t[2]) || !graphs_db.has(t[3]) || graphs_db.has(t[1])) { std::cout << "<INVALID COMMAND>\n"; continue; }
+                const Graph& g1 = graphs_db.get(t[2]), &g2 = graphs_db.get(t[3]);
+                Graph ng; ng.name = t[1];
+                for (size_t i = 0; i < g1.vertices.size(); ++i) if (!ng.vertices.contains(g1.vertices[i])) ng.vertices.push_back(g1.vertices[i]);
+                for (size_t i = 0; i < g2.vertices.size(); ++i) if (!ng.vertices.contains(g2.vertices[i])) ng.vertices.push_back(g2.vertices[i]);
+                auto copy_edges = [&](const Graph& src) {
+                    for (auto it = src.edges.begin(); it != src.edges.end(); ++it) {
+                        if (ng.edges.has((*it).key)) {
+                            Vector<uint32_t>& tw = ng.edges.get((*it).key);
+                            for (size_t i = 0; i < (*it).value.size(); ++i) tw.push_back((*it).value[i]);
+                        } else ng.edges.add((*it).key, (*it).value);
+                    }
+                };
+                copy_edges(g1); copy_edges(g2);
+                graphs_db.add(t[1], std::move(ng));
+            }
+            else if (cmd == "extract") {
+                if (t.size() < 4 || !graphs_db.has(t[2]) || graphs_db.has(t[1])) { std::cout << "<INVALID COMMAND>\n"; continue; }
+                size_t k = std::stoul(t[3]);
+                if (t.size() != 4 + k) { std::cout << "<INVALID COMMAND>\n"; continue; }
+                const Graph& og = graphs_db.get(t[2]);
+                Vector<std::string> ev; bool valid = true;
+                for (size_t i = 0; i < k; ++i) {
+                    if (!og.vertices.contains(t[4 + i])) { valid = false; break; }
+                    if (!ev.contains(t[4 + i])) ev.push_back(t[4 + i]);
+                }
+                if (!valid) { std::cout << "<INVALID COMMAND>\n"; continue; }
+                Graph ng; ng.name = t[1]; ng.vertices = ev;
+                for (auto it = og.edges.begin(); it != og.edges.end(); ++it) {
+                    if (ev.contains((*it).key.first) && ev.contains((*it).key.second)) ng.edges.add((*it).key, (*it).value);
+                }
+                graphs_db.add(t[1], std::move(ng));
+            }
             else { std::cout << "<INVALID COMMAND>\n"; }
         } catch (...) { std::cout << "<INVALID COMMAND>\n"; }
     }
 }
 
-} 
+}
 
 int main(int argc, char* argv[]) {
     if (argc != 2) { std::cerr << "Usage: " << argv[0] << " <filename>\n"; return 1; }

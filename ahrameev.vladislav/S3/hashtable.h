@@ -1,5 +1,5 @@
-#ifndef AHRAMEEV_HASHTABLE_H
-#define AHRAMEEV_HASHTABLE_H
+#ifndef AHFRAMEEV_HASHTABLE_H
+#define AHFRAMEEV_HASHTABLE_H
 
 #include <string>
 #include <cstdint>
@@ -190,14 +190,52 @@ public:
     }
 
     struct Iterator {
-        Slot* ptr, *end;
-        Iterator& operator++() { do { ++ptr; } while (ptr != end && ptr->state != State::Occupied); return *this; }
+        Slot* ptr;
+        Slot* end;
+        
+        Iterator& operator++() {
+            do { ++ptr; } while (ptr != end && ptr->state != State::Occupied);
+            return *this;
+        }
+        
         bool operator!=(const Iterator& o) const { return ptr != o.ptr; }
         Slot& operator*() { return *ptr; }
         Slot* operator->() { return ptr; }
     };
-    Iterator begin() { Iterator it{table_, table_ + capacity_}; if (it.ptr != it.end && it.ptr->state != State::Occupied) ++it; return it; }
-    Iterator end() { return Iterator{table_ + capacity_, table_ + capacity_}; }
+    
+    struct ConstIterator {
+        const Slot* ptr;
+        const Slot* end;
+        
+        ConstIterator& operator++() {
+            do { ++ptr; } while (ptr != end && ptr->state != State::Occupied);
+            return *this;
+        }
+        
+        bool operator!=(const ConstIterator& o) const { return ptr != o.ptr; }
+        const Slot& operator*() const { return *ptr; }
+        const Slot* operator->() const { return ptr; }
+    };
+
+    Iterator begin() { 
+        Iterator it{table_, table_ + capacity_}; 
+        if (it.ptr != it.end && it.ptr->state != State::Occupied) ++it; 
+        return it; 
+    }
+    
+    Iterator end() { 
+        return Iterator{table_ + capacity_, table_ + capacity_}; 
+    }
+    
+    ConstIterator begin() const { 
+        ConstIterator it{table_, table_ + capacity_}; 
+        if (it.ptr != it.end && it.ptr->state != State::Occupied) ++it; 
+        return it; 
+    }
+    
+    ConstIterator end() const { 
+        return ConstIterator{table_ + capacity_, table_ + capacity_}; 
+    }
 };
 
 } 
