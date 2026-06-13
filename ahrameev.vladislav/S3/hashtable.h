@@ -91,11 +91,11 @@ struct PairEq {
 
 template <class Key, class Value, class Hash, class Equal>
 class HashTable {
-    enum class State { Empty, Occupied };
+    enum class State { Empty, Occupied, Tombstone };
     struct Slot { State state; Key key; Value value; Slot() : state(State::Empty) {} };
 
     Slot* table_;
-    size_t capacity_, size_;
+    size_t capacity_, size_, tombstones_;
     Hash hash_func_;
     Equal equal_func_;
 
@@ -103,7 +103,7 @@ class HashTable {
 
     void reallocate(size_t new_cap) {
         Slot* old = table_; size_t old_cap = capacity_;
-        table_ = new Slot[new_cap]; capacity_ = new_cap; size_ = 0;
+        table_ = new Slot[new_cap]; capacity_ = new_cap; size_ = 0; tombstones_ = 0;
         for (size_t i = 0; i < old_cap; ++i) {
             if (old[i].state == State::Occupied) {
                 size_t h = hash_func_(old[i].key);
@@ -122,23 +122,31 @@ class HashTable {
     }
 
 public:
-    explicit HashTable(size_t cap = 16) : capacity_(cap), size_(0) { table_ = new Slot[capacity_]; }
+    explicit HashTable(size_t cap = 16) : capacity_(cap), size_(0), tombstones_(0) { table_ = new Slot[capacity_]; }
     ~HashTable() { delete[] table_; }
 
     HashTable(const HashTable&) = delete;
     HashTable& operator=(const HashTable&) = delete;
-    HashTable(HashTable&& o) noexcept : table_(o.table_), capacity_(o.capacity_), size_(o.size_), hash_func_(std::move(o.hash_func_)), equal_func_(std::move(o.equal_func_)) {
-        o.table_ = nullptr; o.capacity_ = o.size_ = 0;
+    HashTable(HashTable&& o) noexcept : table_(o.table_), capacity_(o.capacity_), size_(o.size_), tombstones_(o.tombstones_), hash_func_(std::move(o.hash_func_)), equal_func_(std::move(o.equal_func_)) {
+        o.table_ = nullptr; o.capacity_ = o.size_ = o.tombstones_ = 0;
     }
 
     void add(const Key& k, const Value& v) {
         size_t h = hash_func_(k);
+        int first_ts = -1;
         for (size_t i = 0; i < capacity_; ++i) {
             size_t idx = probe(h, i);
             if (table_[idx].state == State::Empty) {
-                table_[idx].state = State::Occupied; table_[idx].key = k; table_[idx].value = v; size_++; return;
+                size_t ins = (first_ts != -1) ? (size_t)first_ts : idx;
+                if (first_ts != -1) tombstones_--;
+                table_[ins].state = State::Occupied; table_[ins].key = k; table_[ins].value = v; size_++; return;
             }
             if (table_[idx].state == State::Occupied && equal_func_(table_[idx].key, k)) throw std::invalid_argument("Key exists");
+            if (table_[idx].state == State::Tombstone && first_ts == -1) first_ts = (int)idx;
+        }
+        if (first_ts != -1) {
+            size_t ins = (size_t)first_ts; tombstones_--;
+            table_[ins].state = State::Occupied; table_[ins].key = k; table_[ins].value = v; size_++; return;
         }
         throw std::length_error("Hash table is full");
     }
@@ -161,6 +169,19 @@ public:
             if (table_[idx].state == State::Occupied && equal_func_(table_[idx].key, k)) return true;
         }
         return false;
+    }
+
+    Value drop(const Key& k) {
+        size_t h = hash_func_(k);
+        for (size_t i = 0; i < capacity_; ++i) {
+            size_t idx = probe(h, i);
+            if (table_[idx].state == State::Empty) break;
+            if (table_[idx].state == State::Occupied && equal_func_(table_[idx].key, k)) {
+                Value v = std::move(table_[idx].value);
+                table_[idx].state = State::Tombstone; size_--; tombstones_++; return v;
+            }
+        }
+        throw std::out_of_range("Key not found");
     }
 };
 
