@@ -100,6 +100,81 @@ public:
   }
 };
 
+template< class Key, class Value >
+class BSTConstIterator
+{
+  template< class K, class V, class C >
+  friend class BSTree;
+
+  using Node = BSTNode< Key, Value >;
+
+  const Node* current_;
+  const Node* sentinel_;
+
+public:
+  BSTConstIterator()
+    : current_(nullptr)
+    , sentinel_(nullptr)
+  {}
+
+  BSTConstIterator(const Node* node, const Node* sentinel)
+    : current_(node)
+    , sentinel_(sentinel)
+  {}
+
+  BSTConstIterator(const BSTIterator< Key, Value >& it)
+    : current_(it.current_)
+    , sentinel_(it.sentinel_)
+  {}
+
+  const std::pair< Key, Value >& operator*() const
+  {
+    return current_->data;
+  }
+
+  const std::pair< Key, Value >* operator->() const
+  {
+    return &(current_->data);
+  }
+
+  BSTConstIterator& operator++()
+  {
+    if (current_->right != sentinel_) {
+      current_ = current_->right;
+      while (current_->left != sentinel_) {
+        current_ = current_->left;
+      }
+    } else {
+      const Node* p = current_->parent;
+      while (p != sentinel_ && current_ == p->right) {
+        current_ = p;
+        p = p->parent;
+      }
+      if (p != sentinel_ || current_ == sentinel_) {
+        current_ = p;
+      }
+    }
+    return *this;
+  }
+
+  BSTConstIterator operator++(int)
+  {
+    BSTConstIterator tmp = *this;
+    ++(*this);
+    return tmp;
+  }
+
+  bool operator==(const BSTConstIterator& other) const
+  {
+    return current_ == other.current_;
+  }
+
+  bool operator!=(const BSTConstIterator& other) const
+  {
+    return current_ != other.current_;
+  }
+};
+
 } 
 
 #endif 
