@@ -2,8 +2,9 @@
 #define BST_HPP
 
 #include <cstddef>
-#include <utility>
 #include <functional>
+#include <stdexcept>
+#include <utility>
 
 namespace ahrameev
 {
@@ -207,6 +208,21 @@ class BSTree
     return newNode;
   }
 
+  Node* findNode(const Key& k) const
+  {
+    Node* cur = root_;
+    while (cur != sentinel_) {
+      if (comp_(k, cur->data.first)) {
+        cur = cur->left;
+      } else if (comp_(cur->data.first, k)) {
+        cur = cur->right;
+      } else {
+        return cur;
+      }
+    }
+    return nullptr;
+  }
+
 public:
   using iterator = BSTIterator< Key, Value >;
   using const_iterator = BSTConstIterator< Key, Value >;
@@ -301,6 +317,51 @@ public:
   const_iterator end() const
   {
     return const_iterator(sentinel_, sentinel_);
+  }
+
+  void push(const Key& k, const Value& v)
+  {
+    if (root_ == sentinel_) {
+      root_ = new Node(k, v, sentinel_);
+      root_->left = sentinel_;
+      root_->right = sentinel_;
+      size_++;
+      return;
+    }
+    Node* cur = root_;
+    while (true) {
+      if (comp_(k, cur->data.first)) {
+        if (cur->left == sentinel_) {
+          cur->left = new Node(k, v, cur);
+          cur->left->left = sentinel_;
+          cur->left->right = sentinel_;
+          size_++;
+          return;
+        }
+        cur = cur->left;
+      } else if (comp_(cur->data.first, k)) {
+        if (cur->right == sentinel_) {
+          cur->right = new Node(k, v, cur);
+          cur->right->left = sentinel_;
+          cur->right->right = sentinel_;
+          size_++;
+          return;
+        }
+        cur = cur->right;
+      } else {
+        cur->data.second = v;
+        return;
+      }
+    }
+  }
+
+  Value get(const Key& k) const
+  {
+    Node* node = findNode(k);
+    if (!node) {
+      throw std::runtime_error("Key not found");
+    }
+    return node->data.second;
   }
 
   bool empty() const
