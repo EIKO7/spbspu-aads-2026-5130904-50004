@@ -11,6 +11,6 @@ namespace ahrameev
 using Dictionary = BSTree< int, std::string >;
 using DictionaryStore = BSTree< std::string, Dictionary >;
 
-}
+} 
 
 #endif 

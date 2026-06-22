@@ -58,7 +58,7 @@ int main(int argc, char* argv[])
     }
     manager.addDictionary(dictName, dict);
   }
-    std::string cmd;
+  std::string cmd;
   while (std::cin >> cmd) {
     if (cmd == "print") {
       std::string name;
@@ -79,7 +79,7 @@ int main(int argc, char* argv[])
       for (auto it = dict.begin(); it != dict.end(); ++it) {
         std::cout << " " << it->first << " " << it->second;
       }
-      std::cout << std::endl;
+      std::cout << '\n';
     } else if (cmd == "complement") {
       std::string n;
       std::string n1;

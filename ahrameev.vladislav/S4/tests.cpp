@@ -46,6 +46,67 @@ void testIterator()
   std::cout << "Iterators: PASSED" << '\n';
 }
 
+void testRotations()
+{
+  ahrameev::BSTree< int, std::string > tree;
+  tree.push(2, "b");
+  tree.push(1, "a");
+  tree.push(3, "c");
+  auto it = tree.begin();
+  ++it;
+  assert(it->first == 2);
+  tree.rotateLeft(it);
+  tree.push(4, "d");
+  tree.push(5, "e");
+  std::cout << "Rotations: PASSED" << '\n';
+}
+
+void testCopyConstructor()
+{
+  ahrameev::BSTree< int, std::string > tree1;
+  tree1.push(1, "one");
+  tree1.push(2, "two");
+  tree1.push(3, "three");
+  ahrameev::BSTree< int, std::string > tree2(tree1);
+  assert(tree2.size() == 3);
+  assert(tree2.get(1) == "one");
+  assert(tree2.get(2) == "two");
+  assert(tree2.get(3) == "three");
+  tree2.push(4, "four");
+  assert(tree1.size() == 3);
+  assert(tree2.size() == 4);
+  std::cout << "Copy constructor: PASSED" << '\n';
+}
+
+void testAssignmentOperator()
+{
+  ahrameev::BSTree< int, std::string > tree1;
+  tree1.push(10, "ten");
+  tree1.push(20, "twenty");
+  ahrameev::BSTree< int, std::string > tree2;
+  tree2 = tree1;
+  assert(tree2.size() == 2);
+  assert(tree2.get(10) == "ten");
+  assert(tree2.get(20) == "twenty");
+  std::cout << "Assignment operator: PASSED" << '\n';
+}
+
+void testDrop()
+{
+  ahrameev::BSTree< int, std::string > tree;
+  tree.push(5, "five");
+  tree.push(3, "three");
+  tree.push(7, "seven");
+  assert(tree.drop(3) == "three");
+  assert(tree.size() == 2);
+  try {
+    tree.get(3);
+    assert(false);
+  } catch (...) {
+  }
+  std::cout << "Drop: PASSED" << '\n';
+}
+
 void testHeight()
 {
   ahrameev::BSTree< int, std::string > tree;
@@ -72,6 +133,10 @@ int main()
 {
   testBasicOperations();
   testIterator();
+  testRotations();
+  testCopyConstructor();
+  testAssignmentOperator();
+  testDrop();
   testHeight();
   testEmptyTree();
   std::cout << "All tests PASSED!" << '\n';
