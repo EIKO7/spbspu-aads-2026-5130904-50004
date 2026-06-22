@@ -417,6 +417,76 @@ public:
     return res;
   }
 
+  const_iterator rotateLeft(const_iterator it) const
+  {
+    Node* x = it.current_;
+    if (x == sentinel_ || x->right == sentinel_) {
+      return it;
+    }
+    Node* y = x->right;
+    x->right = y->left;
+    if (y->left != sentinel_) {
+      y->left->parent = x;
+    }
+    y->parent = x->parent;
+    if (x->parent == sentinel_) {
+      root_ = y;
+    } else if (x == x->parent->left) {
+      x->parent->left = y;
+    } else {
+      x->parent->right = y;
+    }
+    y->left = x;
+    x->parent = y;
+    return const_iterator(y, sentinel_);
+  }
+
+  const_iterator rotateRight(const_iterator it) const
+  {
+    Node* x = it.current_;
+    if (x == sentinel_ || x->left == sentinel_) {
+      return it;
+    }
+    Node* y = x->left;
+    x->left = y->right;
+    if (y->right != sentinel_) {
+      y->right->parent = x;
+    }
+    y->parent = x->parent;
+    if (x->parent == sentinel_) {
+      root_ = y;
+    } else if (x == x->parent->right) {
+      x->parent->right = y;
+    } else {
+      x->parent->left = y;
+    }
+    y->right = x;
+    x->parent = y;
+    return const_iterator(y, sentinel_);
+  }
+
+  const_iterator rotateLargeLeft(const_iterator it) const
+  {
+    Node* x = it.current_;
+    if (x == sentinel_ || x->right == sentinel_ ||
+        x->right->left == sentinel_) {
+      return it;
+    }
+    rotateRight(const_iterator(x->right, sentinel_));
+    return rotateLeft(it);
+  }
+
+  const_iterator rotateLargeRight(const_iterator it) const
+  {
+    Node* x = it.current_;
+    if (x == sentinel_ || x->left == sentinel_ ||
+        x->left->right == sentinel_) {
+      return it;
+    }
+    rotateLeft(const_iterator(x->left, sentinel_));
+    return rotateRight(it);
+  }
+
   bool empty() const
   {
     return root_ == sentinel_;
