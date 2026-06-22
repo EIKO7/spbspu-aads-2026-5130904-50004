@@ -364,6 +364,59 @@ public:
     return node->data.second;
   }
 
+  Value drop(const Key& k)
+  {
+    Node* node = findNode(k);
+    if (!node) {
+      throw std::runtime_error("Key not found");
+    }
+    Value res = node->data.second;
+    if (node->left == sentinel_ && node->right == sentinel_) {
+      if (node->parent == sentinel_) {
+        root_ = sentinel_;
+      } else if (node == node->parent->left) {
+        node->parent->left = sentinel_;
+      } else {
+        node->parent->right = sentinel_;
+      }
+      delete node;
+    } else if (node->left == sentinel_ || node->right == sentinel_) {
+      Node* child = (node->left != sentinel_) ? node->left : node->right;
+      if (node->parent == sentinel_) {
+        root_ = child;
+      } else if (node == node->parent->left) {
+        node->parent->left = child;
+      } else {
+        node->parent->right = child;
+      }
+      child->parent = node->parent;
+      delete node;
+    } else {
+      Node* succ = node->right;
+      while (succ->left != sentinel_) {
+        succ = succ->left;
+      }
+      node->data = succ->data;
+      if (succ->right == sentinel_) {
+        if (succ == succ->parent->left) {
+          succ->parent->left = sentinel_;
+        } else {
+          succ->parent->right = sentinel_;
+        }
+      } else {
+        succ->right->parent = succ->parent;
+        if (succ == succ->parent->left) {
+          succ->parent->left = succ->right;
+        } else {
+          succ->parent->right = succ->right;
+        }
+      }
+      delete succ;
+    }
+    size_--;
+    return res;
+  }
+
   bool empty() const
   {
     return root_ == sentinel_;
