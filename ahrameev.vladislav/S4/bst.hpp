@@ -208,6 +208,16 @@ class BSTree
     return newNode;
   }
 
+  size_t height(Node* node) const
+  {
+    if (node == sentinel_) {
+      return 0;
+    }
+    size_t lh = height(node->left);
+    size_t rh = height(node->right);
+    return 1 + (lh > rh ? lh : rh);
+  }
+
   Node* findNode(const Key& k) const
   {
     Node* cur = root_;
@@ -485,6 +495,16 @@ public:
     }
     rotateLeft(const_iterator(x->left, sentinel_));
     return rotateRight(it);
+  }
+
+  size_t height() const
+  {
+    return height(root_);
+  }
+
+  size_t height(const_iterator it) const
+  {
+    return height(it.current_);
   }
 
   bool empty() const
