@@ -7,12 +7,12 @@
 int main(int argc, char* argv[])
 {
   if (argc != 2) {
-    std::cerr << "Usage: " << argv[0] << " <filename>" << std::endl;
+    std::cerr << "Usage: " << argv[0] << " <filename>" << '\n';
     return 1;
   }
   std::ifstream file(argv[1]);
   if (!file) {
-    std::cerr << "Cannot open file: " << argv[1] << std::endl;
+    std::cerr << "Cannot open file: " << argv[1] << '\n';
     return 1;
   }
   ahrameev::DictionaryManager manager;
@@ -63,16 +63,16 @@ int main(int argc, char* argv[])
     if (cmd == "print") {
       std::string name;
       if (!(std::cin >> name)) {
-        std::cout << "<INVALID COMMAND>" << std::endl;
+        std::cout << "<INVALID COMMAND>" << '\n';
         continue;
       }
       if (!manager.hasDictionary(name)) {
-        std::cout << "<INVALID COMMAND>" << std::endl;
+        std::cout << "<INVALID COMMAND>" << '\n';
         continue;
       }
       const auto& dict = manager.getDictionary(name);
       if (dict.empty()) {
-        std::cout << "<EMPTY>" << std::endl;
+        std::cout << "<EMPTY>" << '\n';
         continue;
       }
       std::cout << name;
@@ -85,36 +85,36 @@ int main(int argc, char* argv[])
       std::string n1;
       std::string n2;
       if (!(std::cin >> n >> n1 >> n2)) {
-        std::cout << "<INVALID COMMAND>" << std::endl;
+        std::cout << "<INVALID COMMAND>" << '\n';
         continue;
       }
       if (!manager.complement(n, n1, n2)) {
-        std::cout << "<INVALID COMMAND>" << std::endl;
+        std::cout << "<INVALID COMMAND>" << '\n';
       }
     } else if (cmd == "intersect") {
       std::string n;
       std::string n1;
       std::string n2;
       if (!(std::cin >> n >> n1 >> n2)) {
-        std::cout << "<INVALID COMMAND>" << std::endl;
+        std::cout << "<INVALID COMMAND>" << '\n';
         continue;
       }
       if (!manager.intersect(n, n1, n2)) {
-        std::cout << "<INVALID COMMAND>" << std::endl;
+        std::cout << "<INVALID COMMAND>" << '\n';
       }
     } else if (cmd == "union") {
       std::string n;
       std::string n1;
       std::string n2;
       if (!(std::cin >> n >> n1 >> n2)) {
-        std::cout << "<INVALID COMMAND>" << std::endl;
+        std::cout << "<INVALID COMMAND>" << '\n';
         continue;
       }
       if (!manager.unionDicts(n, n1, n2)) {
-        std::cout << "<INVALID COMMAND>" << std::endl;
+        std::cout << "<INVALID COMMAND>" << '\n';
       }
     } else {
-      std::cout << "<INVALID COMMAND>" << std::endl;
+      std::cout << "<INVALID COMMAND>" << '\n';
     }
   }
 }
