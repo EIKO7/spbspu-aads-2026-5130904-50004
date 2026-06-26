@@ -1,5 +1,6 @@
 #include "vault.h"
 
+#include <fstream>
 #include <random>
 
 namespace ahrameev {
@@ -71,6 +72,132 @@ PasswordVault::check_password_strength(const std::string& password) {
     return "STRONG";
   }
   return "WEAK";
+}
+
+void PasswordVault::set_key(const std::string& key) {
+  encryption_key_ = {};
+  if (!key.empty()) {
+    encryption_key_.resize(4);
+    for (size_t i = 0; i < 16 && i < key.size(); ++i) {
+      reinterpret_cast<uint8_t*>(encryption_key_.data())[i] =
+          static_cast<uint8_t>(key[i]);
+    }
+  }
+}
+
+bool PasswordVault::is_key_set() const {
+  return !encryption_key_.empty();
+}
+
+std::vector<uint8_t> PasswordVault::serialize() const {
+  std::vector<uint8_t> buffer;
+  std::vector<std::string> services = list();
+  for (size_t i = 0; i < services.size(); ++i) {
+    const std::string& service = services[i];
+    const Record* record = table_.find(service);
+    uint32_t len = static_cast<uint32_t>(service.size());
+    buffer.insert(
+        buffer.end(),
+        reinterpret_cast<const uint8_t*>(&len),
+        reinterpret_cast<const uint8_t*>(&len) + 4);
+    buffer.insert(buffer.end(), service.begin(), service.end());
+
+    len = static_cast<uint32_t>(record->login.size());
+    buffer.insert(
+        buffer.end(),
+        reinterpret_cast<const uint8_t*>(&len),
+        reinterpret_cast<const uint8_t*>(&len) + 4);
+    buffer.insert(buffer.end(), record->login.begin(), record->login.end());
+
+    len = static_cast<uint32_t>(record->password.size());
+    buffer.insert(
+        buffer.end(),
+        reinterpret_cast<const uint8_t*>(&len),
+        reinterpret_cast<const uint8_t*>(&len) + 4);
+    buffer.insert(
+        buffer.end(), record->password.begin(), record->password.end());
+  }
+  return buffer;
+}
+
+bool PasswordVault::deserialize(const std::vector<uint8_t>& data) {
+  table_ = HashTable();
+  size_t pos = 0;
+  while (pos + 4 <= data.size()) {
+    uint32_t len;
+    std::memcpy(&len, &data[pos], 4);
+    pos += 4;
+    if (pos + len > data.size()) {
+      return false;
+    }
+    std::string service(
+        reinterpret_cast<const char*>(&data[pos]), len);
+    pos += len;
+
+    if (pos + 4 > data.size()) {
+      return false;
+    }
+    std::memcpy(&len, &data[pos], 4);
+    pos += 4;
+    if (pos + len > data.size()) {
+      return false;
+    }
+    std::string login(
+        reinterpret_cast<const char*>(&data[pos]), len);
+    pos += len;
+
+    if (pos + 4 > data.size()) {
+      return false;
+    }
+    std::memcpy(&len, &data[pos], 4);
+    pos += 4;
+    if (pos + len > data.size()) {
+      return false;
+    }
+    std::string password(
+        reinterpret_cast<const char*>(&data[pos]), len);
+    pos += len;
+
+    table_.insert(service, {login, password});
+  }
+  return true;
+}
+
+bool PasswordVault::save_to_file(const std::string& filename) {
+  std::vector<uint8_t> data = serialize();
+  return write_file_bytes(filename, data);
+}
+
+bool PasswordVault::load_from_file(const std::string& filename) {
+  std::vector<uint8_t> data = read_file_bytes(filename);
+  if (data.empty()) {
+    return false;
+  }
+  return deserialize(data);
+}
+
+std::vector<uint8_t>
+PasswordVault::read_file_bytes(const std::string& filename) {
+  std::ifstream file(filename, std::ios::binary);
+  if (!file) {
+    return std::vector<uint8_t>();
+  }
+  return std::vector<uint8_t>(
+      std::istreambuf_iterator<char>(file),
+      std::istreambuf_iterator<char>());
+}
+
+bool PasswordVault::write_file_bytes(
+    const std::string& filename,
+    const std::vector<uint8_t>& data) {
+  std::ofstream file(filename, std::ios::binary);
+  if (!file) {
+    return false;
+  }
+  file.write(
+      reinterpret_cast<const char*>(data.data()),
+      static_cast<std::streamsize>(data.size()));
+  return file.good();
 }
 
 }
