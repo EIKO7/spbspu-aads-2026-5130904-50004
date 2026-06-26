@@ -1,0 +1,45 @@
+#include "xtea.h"
+
+#include <cstring>
+
+namespace ahrameev {
+
+void encrypt_block(uint32_t v[2], const uint32_t key[4], uint32_t rounds) {
+  uint32_t sum = 0;
+  const uint32_t delta = 0x9E3779B9;
+  for (uint32_t i = 0; i < rounds; ++i) {
+    v[0] += ((v[1] << 4 ^ v[1] >> 5) + v[1]) ^ (sum + key[sum & 3]);
+    sum += delta;
+    v[1] += ((v[0] << 4 ^ v[0] >> 5) + v[0]) ^ (sum + key[(sum >> 11) & 3]);
+  }
+}
+
+void decrypt_block(uint32_t v[2], const uint32_t key[4], uint32_t rounds) {
+  uint32_t sum = 0x9E3779B9 * rounds;
+  const uint32_t delta = 0x9E3779B9;
+  for (uint32_t i = 0; i < rounds; ++i) {
+    v[1] -= ((v[0] << 4 ^ v[0] >> 5) + v[0]) ^ (sum + key[(sum >> 11) & 3]);
+    sum -= delta;
+    v[0] -= ((v[1] << 4 ^ v[1] >> 5) + v[1]) ^ (sum + key[sum & 3]);
+  }
+}
+
+std::vector<uint32_t> derive_key(const std::string& pass_key) {
+  std::vector<uint8_t> raw(16, 0);
+  for (size_t i = 0; i < 16; ++i) {
+    raw[i] = static_cast<uint8_t>(pass_key[i % pass_key.size()]);
+  }
+  std::vector<uint32_t> key(4);
+  std::memcpy(key.data(), raw.data(), 16);
+  return key;
+}
+
+std::vector<uint8_t> xtea_encrypt(const std::vector<uint8_t>& data, const std::vector<uint32_t>& key) {
+  return data;
+}
+
+std::vector<uint8_t> xtea_decrypt(const std::vector<uint8_t>& data, const std::vector<uint32_t>& key) {
+  return data;
+}
+
+}
