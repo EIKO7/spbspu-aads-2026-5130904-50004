@@ -13,32 +13,41 @@ bool HashTable::insert(const std::string& key, const Record& value) {
   if (load_factor() >= kMaxLoadFactor) {
     resize();
   }
-  size_t idx = hash_func(key);
+  size_t ideal = hash_func(key);
+  Entry new_entry{key, value, 0, true};
+
   for (size_t i = 0; i < capacity_; ++i) {
-    size_t probe = (idx + i) % capacity_;
-    if (!table_[probe].occupied) {
-      table_[probe] = {key, value, i, true};
+    size_t idx = (ideal + i) % capacity_;
+    if (!table_[idx].occupied) {
+      table_[idx] = std::move(new_entry);
+      table_[idx].distance_from_ideal = i;
       ++count_;
       return true;
     }
-    if (table_[probe].key == key) {
+    if (table_[idx].key == key) {
       return false;
+    }
+    if (i > table_[idx].distance_from_ideal) {
+      std::swap(new_entry, table_[idx]);
+      size_t ideal_displaced = hash_func(new_entry.key);
+      new_entry.distance_from_ideal =
+          (idx - ideal_displaced + capacity_) % capacity_;
     }
   }
   return false;
 }
 
 const Record* HashTable::find(const std::string& key) const {
-  size_t idx = hash_func(key);
+  size_t ideal = hash_func(key);
   for (size_t i = 0; i < capacity_; ++i) {
-    size_t probe = (idx + i) % capacity_;
-    if (!table_[probe].occupied) {
+    size_t idx = (ideal + i) % capacity_;
+    if (!table_[idx].occupied) {
       return nullptr;
     }
-    if (table_[probe].key == key) {
-      return &table_[probe].value;
+    if (table_[idx].key == key) {
+      return &table_[idx].value;
     }
-    if (table_[probe].distance_from_ideal < i) {
+    if (table_[idx].distance_from_ideal < i) {
       return nullptr;
     }
   }
@@ -46,19 +55,33 @@ const Record* HashTable::find(const std::string& key) const {
 }
 
 bool HashTable::erase(const std::string& key) {
-  size_t idx = hash_func(key);
+  size_t ideal = hash_func(key);
   for (size_t i = 0; i < capacity_; ++i) {
-    size_t probe = (idx + i) % capacity_;
-    if (!table_[probe].occupied) {
+    size_t idx = (ideal + i) % capacity_;
+    if (!table_[idx].occupied) {
       return false;
     }
-    if (table_[probe].key == key) {
-      table_[probe].occupied = false;
-      table_[probe].key.clear();
-      table_[probe].value = Record();
-      table_[probe].distance_from_ideal = 0;
+    if (table_[idx].key == key) {
+      size_t shift = idx;
+      while (true) {
+        size_t next = (shift + 1) % capacity_;
+        if (!table_[next].occupied ||
+            table_[next].distance_from_ideal == 0) {
+          table_[shift].occupied = false;
+          table_[shift].key.clear();
+          table_[shift].value = Record();
+          table_[shift].distance_from_ideal = 0;
+          break;
+        }
+        table_[shift] = std::move(table_[next]);
+        table_[shift].distance_from_ideal--;
+        shift = next;
+      }
       --count_;
       return true;
+    }
+    if (table_[idx].distance_from_ideal < i) {
+      return false;
     }
   }
   return false;
