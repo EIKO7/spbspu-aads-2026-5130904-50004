@@ -20,6 +20,9 @@ bool HashTable::insert(const std::string& key, const Record& value) {
       ++count_;
       return true;
     }
+    if (table_[probe].key == key) {
+      return false;
+    }
   }
   return false;
 }
@@ -34,11 +37,29 @@ const Record* HashTable::find(const std::string& key) const {
     if (table_[probe].key == key) {
       return &table_[probe].value;
     }
+    if (table_[probe].distance_from_ideal < i) {
+      return nullptr;
+    }
   }
   return nullptr;
 }
 
 bool HashTable::erase(const std::string& key) {
+  size_t idx = hash_func(key);
+  for (size_t i = 0; i < capacity_; ++i) {
+    size_t probe = (idx + i) % capacity_;
+    if (!table_[probe].occupied) {
+      return false;
+    }
+    if (table_[probe].key == key) {
+      table_[probe].occupied = false;
+      table_[probe].key.clear();
+      table_[probe].value = Record();
+      table_[probe].distance_from_ideal = 0;
+      --count_;
+      return true;
+    }
+  }
   return false;
 }
 
