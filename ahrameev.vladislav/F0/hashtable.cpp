@@ -1,6 +1,7 @@
 #include "hashtable.h"
 
 #include <functional>
+#include <utility>
 
 namespace ahrameev {
 
@@ -10,7 +11,7 @@ HashTable::HashTable() : capacity_(53), count_(0) {
 
 bool HashTable::insert(const std::string& key, const Record& value) {
   if (load_factor() >= kMaxLoadFactor) {
-    return false;
+    resize();
   }
   size_t idx = hash_func(key);
   for (size_t i = 0; i < capacity_; ++i) {
@@ -75,7 +76,18 @@ const std::vector<Entry>& HashTable::entries() const {
   return table_;
 }
 
-void HashTable::resize() {}
+void HashTable::resize() {
+  size_t new_cap = next_prime(capacity_ * 2);
+  std::vector<Entry> old = std::move(table_);
+  capacity_ = new_cap;
+  table_.assign(capacity_, Entry());
+  count_ = 0;
+  for (const auto& e : old) {
+    if (e.occupied) {
+      insert(e.key, e.value);
+    }
+  }
+}
 
 size_t HashTable::hash_func(const std::string& key) const {
   return std::hash<std::string>{}(key) % capacity_;
