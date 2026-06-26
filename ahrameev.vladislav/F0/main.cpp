@@ -1,17 +1,13 @@
 #include <iostream>
 
-#include "vault.h"
+#include "cli.h"
 
 int main() {
   ahrameev::PasswordVault vault;
+  ahrameev::CLI cli(vault);
+
   std::cin.tie(nullptr);
   std::ios_base::sync_with_stdio(false);
 
-  std::string line;
-  while (std::getline(std::cin, line)) {
-    if (line.empty()) {
-      continue;
-    }
-    std::cout << "<OK>\n";
-  }
+  cli.run();
 }

@@ -59,47 +59,133 @@ void CLI::handle_line(const std::string& line) {
 }
 
 void CLI::cmd_add(const std::vector<std::string>& args) {
-  std::cout << "<OK>\n";
+  if (args.size() < 4) {
+    std::cout << "<INVALID COMMAND>\n";
+    return;
+  }
+  if (vault_.add(args[1], args[2], args[3])) {
+    std::cout << "<OK>\n";
+  } else {
+    std::cout << "<ERROR: service already exists>\n";
+  }
 }
 
 void CLI::cmd_get(const std::vector<std::string>& args) {
-  std::cout << "<NOT FOUND>\n";
+  if (args.size() < 2) {
+    std::cout << "<INVALID COMMAND>\n";
+    return;
+  }
+  const Record* record = vault_.get(args[1]);
+  if (record) {
+    std::cout << "<login: " << record->login
+              << ", password: " << record->password << ">\n";
+  } else {
+    std::cout << "<NOT FOUND>\n";
+  }
 }
 
 void CLI::cmd_update(const std::vector<std::string>& args) {
+  if (args.size() < 4) {
+    std::cout << "<INVALID COMMAND>\n";
+    return;
+  }
+  if (args[2] != "login" && args[2] != "password") {
+    std::cout << "<ERROR: invalid field>\n";
+    return;
+  }
   std::cout << "<OK>\n";
 }
 
 void CLI::cmd_delete(const std::vector<std::string>& args) {
-  std::cout << "<OK>\n";
+  if (args.size() < 2) {
+    std::cout << "<INVALID COMMAND>\n";
+    return;
+  }
+  if (vault_.remove(args[1])) {
+    std::cout << "<OK>\n";
+  } else {
+    std::cout << "<NOT FOUND>\n";
+  }
 }
 
 void CLI::cmd_list(const std::vector<std::string>& args) {
-  std::cout << "<EMPTY>\n";
+  std::vector<std::string> services = vault_.list();
+  if (services.empty()) {
+    std::cout << "<EMPTY>\n";
+    return;
+  }
+  for (size_t i = 0; i < services.size(); ++i) {
+    std::cout << "<" << services[i] << ">\n";
+  }
 }
 
 void CLI::cmd_generate(const std::vector<std::string>& args) {
-  std::cout << "<INVALID COMMAND>\n";
+  if (args.size() < 2) {
+    std::cout << "<INVALID COMMAND>\n";
+    return;
+  }
+  try {
+    size_t length = std::stoul(args[1]);
+    if (length < 6) {
+      std::cout << "<ERROR: min length is 6>\n";
+      return;
+    }
+    std::cout << "<" << vault_.generate_password(length) << ">\n";
+  } catch (...) {
+    std::cout << "<INVALID COMMAND>\n";
+  }
 }
 
 void CLI::cmd_check(const std::vector<std::string>& args) {
-  std::cout << "<INVALID COMMAND>\n";
+  if (args.size() < 2) {
+    std::cout << "<INVALID COMMAND>\n";
+    return;
+  }
+  std::cout << "<" << vault_.check_password_strength(args[1]) << ">\n";
 }
 
 void CLI::cmd_search(const std::vector<std::string>& args) {
+  if (args.size() < 2) {
+    std::cout << "<INVALID COMMAND>\n";
+    return;
+  }
   std::cout << "<NO RESULTS>\n";
 }
 
 void CLI::cmd_set_key(const std::vector<std::string>& args) {
+  if (args.size() < 2) {
+    std::cout << "<INVALID COMMAND>\n";
+    return;
+  }
+  vault_.set_key(args[1]);
   std::cout << "<KEY SET>\n";
 }
 
 void CLI::cmd_save(const std::vector<std::string>& args) {
-  std::cout << "<SAVED>\n";
+  if (args.size() < 2) {
+    std::cout << "<INVALID COMMAND>\n";
+    return;
+  }
+  if (vault_.save_to_file(args[1])) {
+    std::string status =
+        vault_.is_key_set() ? "(encrypted)" : "(plaintext)";
+    std::cout << "<SAVED: " << vault_.list().size()
+              << " records " << status << ">\n";
+  } else {
+    std::cout << "<ERROR: failed to save>\n";
+  }
 }
 
 void CLI::cmd_load(const std::vector<std::string>& args) {
-  std::cout << "<LOADED>\n";
+  if (args.size() < 2) {
+    std::cout << "<INVALID COMMAND>\n";
+    return;
+  }
+  if (vault_.load_from_file(args[1])) {
+    std::cout << "<LOADED: " << vault_.list().size() << " records>\n";
+  } else {
+    std::cout << "<ERROR: file not found>\n";
+  }
 }
 
 void CLI::cmd_help(const std::vector<std::string>& args) {

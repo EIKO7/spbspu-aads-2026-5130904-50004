@@ -18,7 +18,13 @@ class PasswordVault {
       const std::string& login,
       const std::string& password);
   const Record* get(const std::string& service) const;
+  bool update(
+      const std::string& service,
+      const std::string& field,
+      const std::string& value);
+  bool remove(const std::string& service);
   std::vector<std::string> list() const;
+  std::vector<std::string> search(const std::string& query) const;
   std::string generate_password(size_t length);
   std::string check_password_strength(const std::string& password);
 
