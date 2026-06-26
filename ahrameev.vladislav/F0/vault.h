@@ -1,3 +1,4 @@
+// include/vault.h
 #ifndef AHFRAMEEV_VAULT_H
 #define AHFRAMEEV_VAULT_H
 
@@ -19,6 +20,8 @@ class PasswordVault {
       const std::string& password);
   const Record* get(const std::string& service) const;
   std::vector<std::string> list() const;
+  std::string generate_password(size_t length);
+  std::string check_password_strength(const std::string& password);
 
  private:
   HashTable table_;

@@ -1,7 +1,9 @@
 #include <iostream>
-#include <string>
+
+#include "vault.h"
 
 int main() {
+  ahrameev::PasswordVault vault;
   std::cin.tie(nullptr);
   std::ios_base::sync_with_stdio(false);
 
