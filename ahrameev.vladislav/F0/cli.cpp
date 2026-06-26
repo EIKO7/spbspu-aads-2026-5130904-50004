@@ -93,7 +93,11 @@ void CLI::cmd_update(const std::vector<std::string>& args) {
     std::cout << "<ERROR: invalid field>\n";
     return;
   }
-  std::cout << "<OK>\n";
+  if (vault_.update(args[1], args[2], args[3])) {
+    std::cout << "<OK>\n";
+  } else {
+    std::cout << "<NOT FOUND>\n";
+  }
 }
 
 void CLI::cmd_delete(const std::vector<std::string>& args) {
@@ -108,7 +112,7 @@ void CLI::cmd_delete(const std::vector<std::string>& args) {
   }
 }
 
-void CLI::cmd_list(const std::vector<std::string>& args) {
+void CLI::cmd_list(const std::vector<std::string>&) {
   std::vector<std::string> services = vault_.list();
   if (services.empty()) {
     std::cout << "<EMPTY>\n";
@@ -149,7 +153,14 @@ void CLI::cmd_search(const std::vector<std::string>& args) {
     std::cout << "<INVALID COMMAND>\n";
     return;
   }
-  std::cout << "<NO RESULTS>\n";
+  std::vector<std::string> results = vault_.search(args[1]);
+  if (results.empty()) {
+    std::cout << "<NO RESULTS>\n";
+    return;
+  }
+  for (size_t i = 0; i < results.size(); ++i) {
+    std::cout << "<" << results[i] << ">\n";
+  }
 }
 
 void CLI::cmd_set_key(const std::vector<std::string>& args) {
@@ -188,7 +199,7 @@ void CLI::cmd_load(const std::vector<std::string>& args) {
   }
 }
 
-void CLI::cmd_help(const std::vector<std::string>& args) {
+void CLI::cmd_help(const std::vector<std::string>&) {
   std::cout << "<Available commands:>\n"
             << "<add, get, update, delete, list>\n"
             << "<generate, check, search>\n"

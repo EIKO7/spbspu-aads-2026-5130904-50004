@@ -32,7 +32,7 @@ class HashTable {
   std::vector<Entry> table_;
   size_t capacity_;
   size_t count_;
-  static constexpr double kMaxLoadFactor = 0.7;
+  static constexpr double k_max_load_factor = 0.7;
 
   void resize();
   size_t hash_func(const std::string& key) const;

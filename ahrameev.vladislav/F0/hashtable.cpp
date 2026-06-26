@@ -10,7 +10,7 @@ HashTable::HashTable() : capacity_(53), count_(0) {
 }
 
 bool HashTable::insert(const std::string& key, const Record& value) {
-  if (load_factor() >= kMaxLoadFactor) {
+  if (load_factor() >= k_max_load_factor) {
     resize();
   }
   size_t ideal = hash_func(key);
@@ -99,6 +99,10 @@ const std::vector<Entry>& HashTable::entries() const {
   return table_;
 }
 
+double HashTable::load_factor() const {
+  return static_cast<double>(count_) / capacity_;
+}
+
 void HashTable::resize() {
   size_t new_cap = next_prime(capacity_ * 2);
   std::vector<Entry> old = std::move(table_);
@@ -114,10 +118,6 @@ void HashTable::resize() {
 
 size_t HashTable::hash_func(const std::string& key) const {
   return std::hash<std::string>{}(key) % capacity_;
-}
-
-double HashTable::load_factor() const {
-  return static_cast<double>(count_) / capacity_;
 }
 
 bool HashTable::is_prime(size_t n) {

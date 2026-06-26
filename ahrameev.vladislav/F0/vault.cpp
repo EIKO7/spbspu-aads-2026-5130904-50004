@@ -1,7 +1,13 @@
 #include "vault.h"
 
+#include <algorithm>
+#include <cctype>
+#include <cstring>
 #include <fstream>
 #include <random>
+#include <sstream>
+
+#include "xtea.h"
 
 namespace ahrameev {
 
@@ -21,10 +27,60 @@ const Record* PasswordVault::get(const std::string& service) const {
   return table_.find(service);
 }
 
+bool PasswordVault::update(
+    const std::string& service,
+    const std::string& field,
+    const std::string& value) {
+  const Record* rec = table_.find(service);
+  if (!rec) {
+    return false;
+  }
+  Record updated = *rec;
+  if (field == "login") {
+    updated.login = value;
+  } else if (field == "password") {
+    updated.password = value;
+  } else {
+    return false;
+  }
+  table_.erase(service);
+  table_.insert(service, updated);
+  return true;
+}
+
+bool PasswordVault::remove(const std::string& service) {
+  return table_.erase(service);
+}
+
 std::vector<std::string> PasswordVault::list() const {
   std::vector<std::string> result;
   for (const auto& entry : table_.entries()) {
     if (entry.occupied) {
+      result.push_back(entry.key);
+    }
+  }
+  return result;
+}
+
+std::vector<std::string> PasswordVault::search(const std::string& query) const {
+  std::vector<std::string> result;
+  std::string query_lower = query;
+  std::transform(
+      query_lower.begin(),
+      query_lower.end(),
+      query_lower.begin(),
+      static_cast<int (*)(int)>(std::tolower));
+  for (const auto& entry : table_.entries()) {
+    if (!entry.occupied) {
+      continue;
+    }
+    std::string key_lower = entry.key;
+    std::transform(
+        key_lower.begin(),
+        key_lower.end(),
+        key_lower.begin(),
+        static_cast<int (*)(int)>(std::tolower));
+    if (key_lower.find(query_lower) != std::string::npos) {
       result.push_back(entry.key);
     }
   }
@@ -164,16 +220,26 @@ bool PasswordVault::deserialize(const std::vector<uint8_t>& data) {
 }
 
 bool PasswordVault::save_to_file(const std::string& filename) {
-  std::vector<uint8_t> data = serialize();
-  return write_file_bytes(filename, data);
+  std::vector<uint8_t> raw_data = serialize();
+  std::vector<uint8_t> output = raw_data;
+  if (is_key_set()) {
+    output = xtea_encrypt(raw_data, encryption_key_);
+  }
+  return write_file_bytes(filename, output);
 }
 
 bool PasswordVault::load_from_file(const std::string& filename) {
-  std::vector<uint8_t> data = read_file_bytes(filename);
-  if (data.empty()) {
+  std::vector<uint8_t> raw_data = read_file_bytes(filename);
+  if (raw_data.empty()) {
     return false;
   }
-  return deserialize(data);
+  if (is_key_set()) {
+    raw_data = xtea_decrypt(raw_data, encryption_key_);
+    if (raw_data.empty()) {
+      return false;
+    }
+  }
+  return deserialize(raw_data);
 }
 
 std::vector<uint8_t>

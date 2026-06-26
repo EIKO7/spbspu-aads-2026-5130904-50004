@@ -4,7 +4,7 @@
 
 namespace ahrameev {
 
-void encrypt_block(uint32_t v[2], const uint32_t key[4], uint32_t rounds) {
+static void encrypt_block(uint32_t v[2], const uint32_t key[4], uint32_t rounds) {
   uint32_t sum = 0;
   const uint32_t delta = 0x9E3779B9;
   for (uint32_t i = 0; i < rounds; ++i) {
@@ -14,7 +14,7 @@ void encrypt_block(uint32_t v[2], const uint32_t key[4], uint32_t rounds) {
   }
 }
 
-void decrypt_block(uint32_t v[2], const uint32_t key[4], uint32_t rounds) {
+static void decrypt_block(uint32_t v[2], const uint32_t key[4], uint32_t rounds) {
   uint32_t sum = 0x9E3779B9 * rounds;
   const uint32_t delta = 0x9E3779B9;
   for (uint32_t i = 0; i < rounds; ++i) {
@@ -34,14 +34,14 @@ std::vector<uint32_t> derive_key(const std::string& pass_key) {
   return key;
 }
 
-std::vector<uint8_t> pad_pkcs7(const std::vector<uint8_t>& data) {
+static std::vector<uint8_t> pad_pkcs7(const std::vector<uint8_t>& data) {
   size_t pad_len = 8 - (data.size() % 8);
   std::vector<uint8_t> padded = data;
   padded.insert(padded.end(), pad_len, static_cast<uint8_t>(pad_len));
   return padded;
 }
 
-std::vector<uint8_t> unpad_pkcs7(const std::vector<uint8_t>& data) {
+static std::vector<uint8_t> unpad_pkcs7(const std::vector<uint8_t>& data) {
   if (data.empty()) {
     return {};
   }
